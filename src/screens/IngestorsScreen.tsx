@@ -83,8 +83,6 @@ export default function IngestorsScreen() {
 
   return (
     <View style={styles.container}>
-      {loading && <LoadingOverlay />}
-
       <View style={styles.header}>
         <Text style={styles.title}>Ingestores</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowModal(true)}>
@@ -178,6 +176,8 @@ export default function IngestorsScreen() {
           </View>
         </View>
       </Modal>
+
+      {loading && <LoadingOverlay />}
     </View>
   );
 }
