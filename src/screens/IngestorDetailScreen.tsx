@@ -73,20 +73,40 @@ export default function IngestorDetailScreen({ route }: Props) {
   }, [loadData]);
 
   const handlePickFile = async () => {
+    console.log('[handlePickFile] iniciando DocumentPicker');
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ['text/csv', 'application/json', 'application/vnd.ms-excel',
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+        type: '*/*',
         copyToCacheDirectory: true,
       });
 
-      if (result.canceled) return;
-      const file = result.assets[0];
+      console.log('[handlePickFile] resultado picker:', JSON.stringify(result));
+
+      if (result.canceled) {
+        console.log('[handlePickFile] picker cancelado');
+        return;
+      }
+
+      const file = result.assets?.[0];
+      if (!file) {
+        console.log('[handlePickFile] assets vacío, result:', JSON.stringify(result));
+        Alert.alert('Error', 'No se pudo obtener el archivo seleccionado.');
+        return;
+      }
+
+      console.log('[handlePickFile] archivo seleccionado:', file.name, file.uri, file.mimeType);
+
+      if (!file.uri) {
+        Alert.alert('Error', 'El archivo no tiene URI válido. Intenta desde la app nativa.');
+        return;
+      }
 
       setUploading(true);
       setUploadProgress(0);
       setError(null);
       setSuccessMsg(null);
+
+      console.log('[handlePickFile] iniciando upload para ingestor:', ingestor.id);
 
       const res = await ingestFile(
         { uri: file.uri, name: file.name, mimeType: file.mimeType ?? 'application/octet-stream' },
@@ -94,10 +114,22 @@ export default function IngestorDetailScreen({ route }: Props) {
         setUploadProgress
       );
 
+      console.log('[handlePickFile] respuesta upload:', JSON.stringify(res));
+
+      if (!res.success) {
+        Alert.alert('Error del servidor', res.message ?? 'El servidor rechazó el archivo.');
+        setError(res.message ?? 'Error al procesar el archivo.');
+        return;
+      }
+
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas procesadas correctamente.`);
       loadData(1);
     } catch (e: any) {
-      const msg = e?.response?.data?.message ?? e?.message ?? 'Intenta nuevamente.';
+      const status = e?.response?.status;
+      const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error;
+      const msg = serverMsg ?? e?.message ?? 'Error desconocido';
+      console.log('[handlePickFile] error:', status, msg, e?.response?.data);
+      Alert.alert(`Error (${status ?? 'red'})`, msg);
       setError(`Error al subir el archivo: ${msg}`);
     } finally {
       setUploading(false);
