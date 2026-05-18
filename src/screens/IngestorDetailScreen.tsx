@@ -87,7 +87,8 @@ export default function IngestorDetailScreen({ route }: Props) {
         return;
       }
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas de prueba procesadas correctamente.`);
-      loadData(1);
+      setPage(1);
+      await loadData(1);
     } catch (e: any) {
       const status = e?.response?.status;
       const msg = e?.response?.data?.message ?? e?.message ?? 'Error desconocido';
@@ -150,7 +151,8 @@ export default function IngestorDetailScreen({ route }: Props) {
       }
 
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas procesadas correctamente.`);
-      loadData(1);
+      setPage(1);
+      await loadData(1);
     } catch (e: any) {
       const status = e?.response?.status;
       const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error;
