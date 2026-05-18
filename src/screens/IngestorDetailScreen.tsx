@@ -96,8 +96,9 @@ export default function IngestorDetailScreen({ route }: Props) {
 
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas procesadas correctamente.`);
       loadData(1);
-    } catch {
-      setError('Error al subir el archivo. Intenta nuevamente.');
+    } catch (e: any) {
+      const msg = e?.response?.data?.message ?? e?.message ?? 'Intenta nuevamente.';
+      setError(`Error al subir el archivo: ${msg}`);
     } finally {
       setUploading(false);
     }
