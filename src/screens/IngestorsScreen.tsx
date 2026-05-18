@@ -94,14 +94,12 @@ export default function IngestorsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Ingestores</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowModal(true)}>
-          <Text style={styles.addBtnText}>+</Text>
-        </TouchableOpacity>
       </View>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
       <FlatList
+        style={styles.list}
         data={ingestors}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -127,7 +125,7 @@ export default function IngestorsScreen() {
             </View>
           ) : null
         }
-        contentContainerStyle={ingestors.length === 0 ? styles.emptyContainer : { paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
 
       <Modal
@@ -198,6 +196,17 @@ export default function IngestorsScreen() {
         </View>
       </Modal>
 
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => {
+          console.log('[IngestorsScreen] FAB pressed, showModal ->', !showModal);
+          setShowModal(true);
+        }}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+
       {loading && <LoadingOverlay />}
     </View>
   );
@@ -214,20 +223,25 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   title: { color: COLORS.textPrimary, fontSize: 26, fontWeight: '800' },
-  addBtn: {
-    backgroundColor: COLORS.accent,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addBtnText: { color: '#000', fontSize: 24, fontWeight: '700', lineHeight: 28 },
-  empty: { alignItems: 'center', marginTop: 40 },
+  list: { flex: 1 },
+  empty: { alignItems: 'center', marginTop: 80 },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
   emptyText: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '600' },
   emptyHint: { color: COLORS.textSecondary, fontSize: 14, marginTop: 4 },
-  emptyContainer: { flex: 1, justifyContent: 'center' },
+  fab: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.accent,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 999,
+    zIndex: 999,
+  },
+  fabText: { color: '#000', fontSize: 32, fontWeight: '700', lineHeight: 38 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
