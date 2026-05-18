@@ -57,8 +57,19 @@ export async function getTransformedData(
   ingestor_id: string,
   page = 1
 ): Promise<TransformedDataResponse> {
-  const { data } = await api.get<TransformedDataResponse>(
+  const { data } = await api.get<any>(
     `/api/transformed-data?ingestor_id=${ingestor_id}&page=${page}`
   );
-  return data;
+  return {
+    data: data.rows ?? [],
+    total: data.total ?? 0,
+    page: data.page ?? 1,
+    pageSize: 10,
+    columns: data.columns ?? [],
+    summary: {
+      totalRows: data.total ?? 0,
+      totalColumns: data.columns?.length ?? 0,
+      columnTypes: data.columnTypes ?? {},
+    },
+  };
 }
