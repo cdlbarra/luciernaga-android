@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import { createIngestor, deleteIngestor, getIngestors } from '../api/ingestors';
@@ -25,6 +26,7 @@ const SOURCE_TYPES = ['csv', 'json', 'excel', 'api', 'database'];
 
 export default function IngestorsScreen() {
   const navigation = useNavigation<Nav>();
+  const insets = useSafeAreaInsets();
   const [ingestors, setIngestors] = useState<Ingestor[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,6 +36,7 @@ export default function IngestorsScreen() {
   const [description, setDescription] = useState('');
   const [sourceType, setSourceType] = useState('csv');
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -67,6 +70,7 @@ export default function IngestorsScreen() {
   const handleCreate = async () => {
     if (!name.trim()) return;
     setCreating(true);
+    setCreateError(null);
     try {
       const created = await createIngestor({ name: name.trim(), description: description.trim(), source_type: sourceType });
       setIngestors((prev) => [created, ...prev]);
@@ -75,10 +79,15 @@ export default function IngestorsScreen() {
       setDescription('');
       setSourceType('csv');
     } catch {
-      setError('No se pudo crear el ingestor.');
+      setCreateError('No se pudo crear el ingestor. Intenta nuevamente.');
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setCreateError(null);
   };
 
   return (
@@ -121,10 +130,22 @@ export default function IngestorsScreen() {
         contentContainerStyle={ingestors.length === 0 ? styles.emptyContainer : { paddingBottom: 24 }}
       />
 
-      <Modal visible={showModal} transparent animationType="slide" onRequestClose={() => setShowModal(false)}>
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="slide"
+        statusBarTranslucent
+        onRequestClose={handleCloseModal}
+      >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { paddingBottom: Math.max(40, insets.bottom + 16) }]}>
             <Text style={styles.modalTitle}>Nuevo Ingestor</Text>
+
+            {createError && (
+              <View style={styles.modalError}>
+                <Text style={styles.modalErrorText}>{createError}</Text>
+              </View>
+            )}
 
             <Text style={styles.label}>Nombre *</Text>
             <TextInput
@@ -162,7 +183,7 @@ export default function IngestorsScreen() {
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowModal(false)}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={handleCloseModal}>
                 <Text style={styles.cancelText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -217,8 +238,14 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 24,
-    paddingBottom: 40,
   },
+  modalError: {
+    backgroundColor: COLORS.error,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 4,
+  },
+  modalErrorText: { color: '#fff', fontSize: 13 },
   modalTitle: { color: COLORS.textPrimary, fontSize: 20, fontWeight: '800', marginBottom: 20 },
   label: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 12 },
   input: {
