@@ -1,5 +1,4 @@
-export const BASE_URL =
-  'https://luciernaga-free-mutmsg5nc-cdlbarras-projects.vercel.app';
+export const BASE_URL = 'https://luciernaga-free.vercel.app';
 
 export const COLORS = {
   background: '#1a1a1a',

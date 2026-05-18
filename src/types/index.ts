@@ -1,11 +1,11 @@
 export interface Ingestor {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   source_type: string;
   status: 'active' | 'inactive' | 'processing' | 'error';
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface TransformedDataRow {
