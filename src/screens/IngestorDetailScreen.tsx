@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import type { RouteProp } from '@react-navigation/native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
-import { getTransformedData, ingestFile } from '../api/ingestors';
+import { getTransformedData, ingestFile, ingestMockData } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
 import StatusBadge from '../components/StatusBadge';
 import { COLORS } from '../constants';
@@ -71,6 +71,33 @@ export default function IngestorDetailScreen({ route }: Props) {
   useEffect(() => {
     loadData(1);
   }, [loadData]);
+
+  const handleMockUpload = async () => {
+    setUploading(true);
+    setUploadProgress(0);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      console.log('[handleMockUpload] enviando datos mock para ingestor:', ingestor.id);
+      const res = await ingestMockData(ingestor.id);
+      console.log('[handleMockUpload] respuesta:', JSON.stringify(res));
+      if (!res.success) {
+        Alert.alert('Error del servidor', res.message ?? 'Error al procesar datos mock.');
+        setError(res.message ?? 'Error al procesar datos mock.');
+        return;
+      }
+      setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas de prueba procesadas correctamente.`);
+      loadData(1);
+    } catch (e: any) {
+      const status = e?.response?.status;
+      const msg = e?.response?.data?.message ?? e?.message ?? 'Error desconocido';
+      console.log('[handleMockUpload] error:', status, msg);
+      Alert.alert(`Error (${status ?? 'red'})`, msg);
+      setError(`Error datos mock: ${msg}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handlePickFile = async () => {
     console.log('[handlePickFile] iniciando DocumentPicker');
@@ -179,9 +206,14 @@ export default function IngestorDetailScreen({ route }: Props) {
             <Text style={styles.progressText}>{uploadProgress}%</Text>
           </View>
         ) : (
-          <TouchableOpacity style={styles.uploadBtn} onPress={handlePickFile}>
-            <Text style={styles.uploadBtnText}>📁  Seleccionar archivo</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={styles.uploadBtn} onPress={handlePickFile}>
+              <Text style={styles.uploadBtnText}>📁  Seleccionar archivo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.mockBtn} onPress={handleMockUpload}>
+              <Text style={styles.mockBtnText}>🧪  Cargar datos de prueba</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
 
@@ -328,6 +360,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   uploadBtnText: { color: '#000', fontWeight: '700', fontSize: 15 },
+  mockBtn: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    paddingVertical: 13,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  mockBtnText: { color: COLORS.accent, fontWeight: '700', fontSize: 15 },
   progressContainer: {
     height: 36,
     backgroundColor: COLORS.background,

@@ -53,6 +53,27 @@ export async function ingestFile(
   return data;
 }
 
+const MOCK_ROWS = [
+  { fecha: '2024-01-05', producto: 'Laptop', categoria: 'Electronica', cantidad: 3, precio: 1200, total: 3600 },
+  { fecha: '2024-01-12', producto: 'Monitor', categoria: 'Electronica', cantidad: 5, precio: 350, total: 1750 },
+  { fecha: '2024-02-03', producto: 'Teclado', categoria: 'Perifericos', cantidad: 10, precio: 80, total: 800 },
+  { fecha: '2024-02-18', producto: 'Mouse', categoria: 'Perifericos', cantidad: 15, precio: 40, total: 600 },
+  { fecha: '2024-03-07', producto: 'Auriculares', categoria: 'Audio', cantidad: 8, precio: 150, total: 1200 },
+  { fecha: '2024-03-22', producto: 'Webcam', categoria: 'Perifericos', cantidad: 6, precio: 90, total: 540 },
+  { fecha: '2024-04-10', producto: 'Laptop', categoria: 'Electronica', cantidad: 2, precio: 1300, total: 2600 },
+  { fecha: '2024-04-25', producto: 'Tablet', categoria: 'Electronica', cantidad: 4, precio: 450, total: 1800 },
+  { fecha: '2024-05-08', producto: 'Monitor', categoria: 'Electronica', cantidad: 3, precio: 380, total: 1140 },
+  { fecha: '2024-05-30', producto: 'Teclado', categoria: 'Perifericos', cantidad: 12, precio: 75, total: 900 },
+];
+
+export async function ingestMockData(ingestor_id: string): Promise<IngestResponse> {
+  const { data } = await api.post<IngestResponse>('/api/ingest', {
+    source: { data: MOCK_ROWS, source_type: 'csv' },
+    ingestor_id,
+  });
+  return data;
+}
+
 export async function getTransformedData(
   ingestor_id: string,
   page = 1
