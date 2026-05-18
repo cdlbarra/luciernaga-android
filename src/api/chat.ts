@@ -2,15 +2,18 @@ import axios from 'axios';
 import { BASE_URL } from '../constants';
 import { ChatResponse } from '../types';
 
-const api = axios.create({ baseURL: BASE_URL });
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: { 'x-vercel-protection-bypass': 'luciernaga-android-bypass' },
+});
 
 export async function sendChatMessage(
   message: string,
   ingestor_id?: string
 ): Promise<ChatResponse> {
   const { data } = await api.post<ChatResponse>('/api/chat', {
-    message,
-    ...(ingestor_id ? { ingestor_id } : {}),
+    messages: [{ role: 'user', content: message }],
+    ...(ingestor_id ? { context: { ingestor_id } } : {}),
   });
   return data;
 }

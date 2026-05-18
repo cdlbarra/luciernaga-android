@@ -40,7 +40,8 @@ export interface ChatMessage {
 }
 
 export interface ChatResponse {
-  response: string;
+  content: string;
+  show_ingestors_list: boolean;
 }
 
 export type RootStackParamList = {

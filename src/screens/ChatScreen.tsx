@@ -60,7 +60,7 @@ export default function ChatScreen() {
       const assistantMsg: ChatMessage = {
         id: uid(),
         role: 'assistant',
-        content: res.response,
+        content: res.content,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMsg]);

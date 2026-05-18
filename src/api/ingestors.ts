@@ -2,7 +2,10 @@ import axios from 'axios';
 import { BASE_URL } from '../constants';
 import { Ingestor, TransformedDataResponse, IngestResponse } from '../types';
 
-const api = axios.create({ baseURL: BASE_URL });
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: { 'x-vercel-protection-bypass': 'luciernaga-android-bypass' },
+});
 
 export async function getIngestors(): Promise<Ingestor[]> {
   const { data } = await api.get<Ingestor[]>('/api/ingestors');
