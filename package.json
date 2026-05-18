@@ -22,7 +22,7 @@
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-gifted-charts": "^1.4.76",
-    "react-native-linear-gradient": "^2.8.3",
+    "expo-linear-gradient": "~14.1.5",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2"
