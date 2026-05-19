@@ -57,22 +57,22 @@ export default function AppNavigator() {
         }}
       >
         <Tab.Screen
-          name="Ingestors"
-          component={IngestorsStack}
-          options={{
-            tabBarLabel: 'Ingestores',
-            tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>DB</Text>
-            ),
-          }}
-        />
-        <Tab.Screen
           name="Chat"
           component={ChatScreen}
           options={{
             tabBarLabel: 'Chat IA',
             tabBarIcon: ({ color, size }) => (
               <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>AI</Text>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Ingestors"
+          component={IngestorsStack}
+          options={{
+            tabBarLabel: 'Ingestores',
+            tabBarIcon: ({ color, size }) => (
+              <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>DB</Text>
             ),
           }}
         />
