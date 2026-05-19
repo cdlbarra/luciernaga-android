@@ -104,7 +104,7 @@ export default function IngestorDetailScreen({ route }: Props) {
     console.log('[handlePickFile] iniciando DocumentPicker');
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
+        type: ['text/csv', 'application/json', 'text/plain'],
         copyToCacheDirectory: true,
       });
 
