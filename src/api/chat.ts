@@ -13,6 +13,7 @@ export async function sendChatMessage(
 ): Promise<ChatResponse> {
   const { data } = await api.post<ChatResponse>('/api/chat', {
     messages: [{ role: 'user', content: message }],
+    model: 'command-r',
     ...(ingestor_id ? { context: { ingestor_id } } : {}),
   });
   return data;
