@@ -62,7 +62,7 @@ export default function AppNavigator() {
           options={{
             tabBarLabel: 'Ingestores',
             tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size - 2, color }}>??</Text>
+              <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>DB</Text>
             ),
           }}
         />
@@ -72,7 +72,7 @@ export default function AppNavigator() {
           options={{
             tabBarLabel: 'Chat IA',
             tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size - 2, color }}>??</Text>
+              <Text style={{ fontSize: size - 2, color, fontWeight: '700' }}>AI</Text>
             ),
           }}
         />
