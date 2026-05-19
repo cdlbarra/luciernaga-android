@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { sendChatMessage } from '../api/chat';
 import { getIngestors } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
@@ -94,6 +95,7 @@ export default function ChatScreen() {
   const activeIngestor = ingestors.find((i) => i.id === selectedIngestor);
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
     <KeyboardAvoidingView
       style={styles.container}
       behavior="padding"
@@ -196,6 +198,7 @@ export default function ChatScreen() {
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -298,7 +301,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    paddingBottom: 80,
+    paddingBottom: 16,
     backgroundColor: COLORS.card,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
