@@ -2,7 +2,7 @@ import React from 'react';
 import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { COLORS } from '../constants';
 import IngestorsScreen from '../screens/IngestorsScreen';
 import IngestorDetailScreen from '../screens/IngestorDetailScreen';
@@ -10,7 +10,7 @@ import ChatScreen from '../screens/ChatScreen';
 import { BottomTabParamList, RootStackParamList } from '../types';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function IngestorsStack() {
   return (
@@ -19,8 +19,7 @@ function IngestorsStack() {
         headerStyle: { backgroundColor: COLORS.card },
         headerTintColor: COLORS.textPrimary,
         headerTitleStyle: { fontWeight: '700' },
-        headerBackTitle: 'Atrás',
-        cardStyle: { backgroundColor: COLORS.background },
+        contentStyle: { backgroundColor: COLORS.background },
       }}
     >
       <Stack.Screen
@@ -63,7 +62,7 @@ export default function AppNavigator() {
           options={{
             tabBarLabel: 'Ingestores',
             tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size - 2, color }}>🗄</Text>
+              <Text style={{ fontSize: size - 2, color }}>??</Text>
             ),
           }}
         />
@@ -73,7 +72,7 @@ export default function AppNavigator() {
           options={{
             tabBarLabel: 'Chat IA',
             tabBarIcon: ({ color, size }) => (
-              <Text style={{ fontSize: size - 2, color }}>💬</Text>
+              <Text style={{ fontSize: size - 2, color }}>??</Text>
             ),
           }}
         />
