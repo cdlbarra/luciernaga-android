@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"C:\\\\Users\\\\cdlbarra\\\\luciernaga-android\"; Get-ChildItem android/ -Recurse -File | Measure-Object | Select-Object Count; Get-ChildItem android/ -Recurse -File | Select-Object -First 30 | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\cdlbarra\\\\luciernaga-android\\\\\", \"\"\\) })",
+      "PowerShell(cd \"C:\\\\Users\\\\cdlbarra\\\\luciernaga-android\"; Get-ChildItem -Path \"android\" -Recurse -Force | Where-Object { -not $_.PSIsContainer } | ForEach-Object { $_.FullName.Replace\\(\"$PWD\\\\\", \"\"\\) })",
+      "PowerShell(cd \"C:\\\\Users\\\\cdlbarra\\\\luciernaga-android\"; git ls-files android/ | Select-Object -First 20; Write-Output \"---\"; Write-Output \"Total tracked in android/:\"; \\(git ls-files android/\\).Count)",
+      "Bash(dir C:\\\\Users\\\\cdlbarra\\\\luciernaga-android *)",
+      "Bash(npm show *)",
+      "Bash(npm install *)",
+      "Bash(npx expo *)",
+      "Bash(curl *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(vercel ls *)",
+      "Bash(npx vercel@latest ls)",
+      "Bash(wait)",
+      "Bash(Start-Sleep -Seconds 30)"
+    ]
+  }
+}
