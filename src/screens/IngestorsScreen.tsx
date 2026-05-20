@@ -110,8 +110,6 @@ export default function IngestorsScreen() {
     } catch {}
   };
 
-  console.log('MODAL VISIBLE:', showModal);
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -160,8 +158,6 @@ export default function IngestorsScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Nuevo Ingestor</Text>
-
-            <Text style={{color: 'red', fontSize: 20}}>TEST VISIBLE</Text>
 
             <ScrollView
               showsVerticalScrollIndicator={false}
