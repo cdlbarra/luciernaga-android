@@ -32,6 +32,10 @@ export async function deleteIngestorsBatch(ids: string[]): Promise<void> {
   await api.delete('/api/ingestors/batch', { data: { ids } });
 }
 
+export async function updateIngestorStatus(id: string, status: string): Promise<void> {
+  await api.patch(`/api/ingestors/${id}`, { status });
+}
+
 export async function ingestFile(
   file: { uri: string; name: string; mimeType: string },
   ingestor_id: string,

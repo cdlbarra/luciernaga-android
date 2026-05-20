@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import type { RouteProp } from '@react-navigation/native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
-import { getTransformedData, ingestFile, ingestMockData } from '../api/ingestors';
+import { getTransformedData, ingestFile, ingestMockData, updateIngestorStatus } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
 import StatusBadge from '../components/StatusBadge';
 import { COLORS } from '../constants';
@@ -105,6 +105,7 @@ export default function IngestorDetailScreen({ route }: Props) {
         return;
       }
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas de prueba procesadas correctamente.`);
+      updateIngestorStatus(ingestor.id, 'active').catch(() => null);
       setPage(1);
       await loadData(1);
     } catch (e: any) {
@@ -189,6 +190,7 @@ export default function IngestorDetailScreen({ route }: Props) {
 
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas procesadas correctamente.`);
       setSelectedFile(null);
+      updateIngestorStatus(ingestor.id, 'active').catch(() => null);
       setPage(1);
       await loadData(1);
     } catch (e: any) {
