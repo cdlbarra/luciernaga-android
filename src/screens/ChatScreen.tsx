@@ -10,8 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { sendChatMessage } from '../api/chat';
-import { getIngestors } from '../api/ingestors';
+import { sendChatMessage, ChatDataContext } from '../api/chat';
+import { getIngestors, getTransformedData } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
 import { COLORS } from '../constants';
 import { ChatMessage, Ingestor } from '../types';
@@ -26,6 +26,8 @@ export default function ChatScreen() {
   const [error, setError] = useState<string | null>(null);
   const [ingestors, setIngestors] = useState<Ingestor[]>([]);
   const [selectedIngestor, setSelectedIngestor] = useState<string | undefined>(undefined);
+  const [ingestorData, setIngestorData] = useState<ChatDataContext | null>(null);
+  const [loadingContext, setLoadingContext] = useState(false);
   const listRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -33,6 +35,26 @@ export default function ChatScreen() {
       .then(setIngestors)
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!selectedIngestor) {
+      setIngestorData(null);
+      return;
+    }
+    const ing = ingestors.find((i) => i.id === selectedIngestor);
+    setLoadingContext(true);
+    getTransformedData(selectedIngestor)
+      .then((res) => {
+        setIngestorData({
+          ingestor_name: ing?.name ?? selectedIngestor,
+          rows: res.data,
+          columns: res.columns,
+          totalRows: res.total,
+        });
+      })
+      .catch(() => setIngestorData(null))
+      .finally(() => setLoadingContext(false));
+  }, [selectedIngestor, ingestors]);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -56,7 +78,7 @@ export default function ChatScreen() {
     setError(null);
 
     try {
-      const res = await sendChatMessage(text, selectedIngestor);
+      const res = await sendChatMessage(text, selectedIngestor, ingestorData ?? undefined);
       const assistantMsg: ChatMessage = {
         id: uid(),
         role: 'assistant',
@@ -140,6 +162,11 @@ export default function ChatScreen() {
         <View style={styles.contextBanner}>
           <Text style={styles.contextText}>
             📊  Contexto activo: <Text style={{ color: COLORS.accent }}>{activeIngestor.name}</Text>
+            {loadingContext
+              ? '  cargando datos…'
+              : ingestorData
+                ? `  · ${ingestorData.totalRows} filas`
+                : ''}
           </Text>
         </View>
       )}
