@@ -239,7 +239,6 @@ export default function IngestorsScreen() {
       <TouchableOpacity
         style={styles.fab}
         onPress={() => {
-          console.log('[IngestorsScreen] FAB pressed, showModal ->', !showModal);
           setShowModal(true);
         }}
         activeOpacity={0.8}
