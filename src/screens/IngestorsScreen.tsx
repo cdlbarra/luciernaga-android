@@ -156,65 +156,71 @@ export default function IngestorsScreen() {
         onRequestClose={handleCloseModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { paddingBottom: Math.max(40, insets.bottom + 16) }]}>
+          <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Nuevo Ingestor</Text>
 
-            {createError && (
-              <View style={styles.modalError}>
-                <Text style={styles.modalErrorText}>{createError}</Text>
-              </View>
-            )}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: Math.max(40, insets.bottom + 16) }}
+            >
+              {createError && (
+                <View style={styles.modalError}>
+                  <Text style={styles.modalErrorText}>{createError}</Text>
+                </View>
+              )}
 
-            <Text style={styles.label}>Nombre *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Ej. Ventas 2024"
-              placeholderTextColor={COLORS.textSecondary}
-              value={name}
-              onChangeText={setName}
-            />
-            <TouchableOpacity onPress={handleSuggestName} style={styles.suggestBtn}>
-              <Text style={styles.suggestText}>📁  Sugerir desde archivo</Text>
-            </TouchableOpacity>
+              <Text style={styles.label}>Nombre *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ej. Ventas 2024"
+                placeholderTextColor={COLORS.textSecondary}
+                value={name}
+                onChangeText={setName}
+              />
+              <TouchableOpacity onPress={handleSuggestName} style={styles.suggestBtn}>
+                <Text style={styles.suggestText}>📁  Sugerir nombre desde archivo</Text>
+              </TouchableOpacity>
 
-            <Text style={styles.label}>Descripción</Text>
-            <TextInput
-              style={[styles.input, styles.inputMulti]}
-              placeholder="Descripción opcional"
-              placeholderTextColor={COLORS.textSecondary}
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={3}
-            />
+              <Text style={styles.label}>Descripción</Text>
+              <TextInput
+                style={[styles.input, styles.inputMulti]}
+                placeholder="Descripción opcional"
+                placeholderTextColor={COLORS.textSecondary}
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={3}
+              />
 
-            <Text style={styles.label}>Tipo de fuente</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chips}>
-              {SOURCE_TYPES.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[styles.chip, sourceType === type && styles.chipActive]}
-                  onPress={() => setSourceType(type)}
-                >
-                  <Text style={[styles.chipText, sourceType === type && styles.chipTextActive]}>
-                    {type.toUpperCase()}
-                  </Text>
+              <Text style={styles.label}>Tipo de fuente</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chips}>
+                {SOURCE_TYPES.map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[styles.chip, sourceType === type && styles.chipActive]}
+                    onPress={() => setSourceType(type)}
+                  >
+                    <Text style={[styles.chipText, sourceType === type && styles.chipTextActive]}>
+                      {type.toUpperCase()}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={handleCloseModal}>
+                  <Text style={styles.cancelText}>Cancelar</Text>
                 </TouchableOpacity>
-              ))}
+                <TouchableOpacity
+                  style={[styles.createBtn, (!name.trim() || creating) && styles.createBtnDisabled]}
+                  onPress={handleCreate}
+                  disabled={!name.trim() || creating}
+                >
+                  <Text style={styles.createBtnText}>{creating ? 'Creando…' : 'Crear'}</Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={handleCloseModal}>
-                <Text style={styles.cancelText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.createBtn, (!name.trim() || creating) && styles.createBtnDisabled]}
-                onPress={handleCreate}
-                disabled={!name.trim() || creating}
-              >
-                <Text style={styles.createBtnText}>{creating ? 'Creando…' : 'Crear'}</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </Modal>
@@ -327,6 +333,14 @@ const styles = StyleSheet.create({
   },
   createBtnDisabled: { opacity: 0.4 },
   createBtnText: { color: '#000', fontWeight: '800', fontSize: 15 },
-  suggestBtn: { marginTop: 6, alignSelf: 'flex-start' },
-  suggestText: { color: COLORS.accent, fontSize: 12, fontWeight: '600' },
+  suggestBtn: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+  suggestText: { color: COLORS.accent, fontSize: 13, fontWeight: '600' },
 });
