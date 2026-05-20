@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../constants';
 import IngestorsScreen from '../screens/IngestorsScreen';
 import IngestorDetailScreen from '../screens/IngestorDetailScreen';
@@ -39,6 +40,7 @@ function IngestorsStack() {
 }
 
 export default function AppNavigator() {
+  const insets = useSafeAreaInsets();
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -48,8 +50,8 @@ export default function AppNavigator() {
             backgroundColor: COLORS.card,
             borderTopColor: COLORS.border,
             borderTopWidth: 1,
-            height: 60,
-            paddingBottom: 8,
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom + 8,
           },
           tabBarActiveTintColor: COLORS.accent,
           tabBarInactiveTintColor: COLORS.textSecondary,
