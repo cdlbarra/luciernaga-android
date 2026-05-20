@@ -43,9 +43,8 @@ export async function ingestFile(
     name: file.name,
     type: file.mimeType,
   } as unknown as Blob);
-  form.append('ingestor_id', ingestor_id);
 
-  const { data } = await api.post<IngestResponse>('/api/ingest', form, {
+  const { data } = await api.post<IngestResponse>(`/api/ingest?ingestor_id=${ingestor_id}`, form, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (e) => {
       if (onProgress && e.total) {
