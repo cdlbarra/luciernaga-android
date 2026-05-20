@@ -91,7 +91,7 @@ export default function IngestorsScreen() {
     setCreateError(null);
   };
 
-  const handleSuggestName = async () => {
+  const handleSuggestFromFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['text/csv', 'application/json', 'text/plain',
@@ -178,8 +178,19 @@ export default function IngestorsScreen() {
                 value={name}
                 onChangeText={setName}
               />
-              <TouchableOpacity onPress={handleSuggestName} style={styles.suggestBtn}>
-                <Text style={styles.suggestText}>📁  Sugerir nombre desde archivo</Text>
+              <TouchableOpacity
+                onPress={handleSuggestFromFile}
+                style={{
+                  backgroundColor: '#F5C518',
+                  padding: 12,
+                  borderRadius: 8,
+                  marginBottom: 16,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: '#000', fontWeight: 'bold', fontSize: 14 }}>
+                  📁 Sugerir nombre desde archivo
+                </Text>
               </TouchableOpacity>
 
               <Text style={styles.label}>Descripción</Text>
