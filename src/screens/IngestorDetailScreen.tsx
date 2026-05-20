@@ -19,6 +19,16 @@ import { RootStackParamList, TransformedDataResponse, TransformedDataRow } from 
 
 type Props = { route: RouteProp<RootStackParamList, 'IngestorDetail'> };
 
+type SelectedFile = { uri: string; name: string; mimeType: string; size?: number };
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
 function detectDateColumn(columns: string[]): string | null {
   return columns.find((c) => /date|fecha|time|año|year/i.test(c)) ?? null;
 }
@@ -54,6 +64,7 @@ export default function IngestorDetailScreen({ route }: Props) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
 
   const loadData = useCallback(async (p: number) => {
     setLoadingData(true);
@@ -78,12 +89,11 @@ export default function IngestorDetailScreen({ route }: Props) {
     setError(null);
     setSuccessMsg(null);
     try {
-      console.log('[handleMockUpload] enviando datos mock para ingestor:', ingestor.id);
       const res = await ingestMockData(ingestor.id);
-      console.log('[handleMockUpload] respuesta:', JSON.stringify(res));
       if (!res.success) {
-        Alert.alert('Error del servidor', res.message ?? 'Error al procesar datos mock.');
-        setError(res.message ?? 'Error al procesar datos mock.');
+        const msg = res.message ?? 'Error al procesar datos mock.';
+        Alert.alert('Error del servidor', msg);
+        setError(msg);
         return;
       }
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas de prueba procesadas correctamente.`);
@@ -91,75 +101,94 @@ export default function IngestorDetailScreen({ route }: Props) {
       await loadData(1);
     } catch (e: any) {
       const status = e?.response?.status;
-      const msg = e?.response?.data?.message ?? e?.message ?? 'Error desconocido';
-      console.log('[handleMockUpload] error:', status, msg);
+      const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error;
+      const msg = serverMsg ?? e?.message ?? 'Error desconocido';
       Alert.alert(`Error (${status ?? 'red'})`, msg);
-      setError(`Error datos mock: ${msg}`);
+      setError(msg);
     } finally {
       setUploading(false);
     }
   };
 
   const handlePickFile = async () => {
-    console.log('[handlePickFile] iniciando DocumentPicker');
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: ['text/csv', 'application/json', 'text/plain'],
+        type: [
+          'text/csv',
+          'application/json',
+          'text/plain',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          '*/*',
+        ],
         copyToCacheDirectory: true,
       });
 
-      console.log('[handlePickFile] resultado picker:', JSON.stringify(result));
-
-      if (result.canceled) {
-        console.log('[handlePickFile] picker cancelado');
-        return;
-      }
+      if (result.canceled) return;
 
       const file = result.assets?.[0];
       if (!file) {
-        console.log('[handlePickFile] assets vacío, result:', JSON.stringify(result));
         Alert.alert('Error', 'No se pudo obtener el archivo seleccionado.');
         return;
       }
-
-      console.log('[handlePickFile] archivo seleccionado:', file.name, file.uri, file.mimeType);
 
       if (!file.uri) {
         Alert.alert('Error', 'El archivo no tiene URI válido. Intenta desde la app nativa.');
         return;
       }
 
-      setUploading(true);
-      setUploadProgress(0);
+      setSelectedFile({
+        uri: file.uri,
+        name: file.name,
+        mimeType: file.mimeType ?? 'application/octet-stream',
+        size: file.size ?? undefined,
+      });
       setError(null);
       setSuccessMsg(null);
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'No se pudo abrir el selector de archivos.');
+    }
+  };
 
-      console.log('[handlePickFile] iniciando upload para ingestor:', ingestor.id);
+  const handleIngest = async () => {
+    if (!selectedFile) return;
 
+    if (selectedFile.size != null && selectedFile.size > MAX_FILE_SIZE) {
+      Alert.alert(
+        'Archivo demasiado grande',
+        `El archivo pesa ${formatFileSize(selectedFile.size)}. El límite es 5 MB.`
+      );
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(0);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
       const res = await ingestFile(
-        { uri: file.uri, name: file.name, mimeType: file.mimeType ?? 'application/octet-stream' },
+        { uri: selectedFile.uri, name: selectedFile.name, mimeType: selectedFile.mimeType },
         ingestor.id,
         setUploadProgress
       );
 
-      console.log('[handlePickFile] respuesta upload:', JSON.stringify(res));
-
       if (!res.success) {
-        Alert.alert('Error del servidor', res.message ?? 'El servidor rechazó el archivo.');
-        setError(res.message ?? 'Error al procesar el archivo.');
+        const msg = res.message ?? 'El servidor rechazó el archivo.';
+        Alert.alert('Error del servidor', msg);
+        setError(msg);
         return;
       }
 
       setSuccessMsg(`✓ ${res.rowsProcessed ?? 0} filas procesadas correctamente.`);
+      setSelectedFile(null);
       setPage(1);
       await loadData(1);
     } catch (e: any) {
       const status = e?.response?.status;
       const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error;
       const msg = serverMsg ?? e?.message ?? 'Error desconocido';
-      console.log('[handlePickFile] error:', status, msg, e?.response?.data);
       Alert.alert(`Error (${status ?? 'red'})`, msg);
-      setError(`Error al subir el archivo: ${msg}`);
+      setError(msg);
     } finally {
       setUploading(false);
     }
@@ -201,17 +230,45 @@ export default function IngestorDetailScreen({ route }: Props) {
       {/* Upload card */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Cargar Archivo</Text>
-        <Text style={styles.hint}>CSV, JSON o Excel. El archivo se procesará con el ingestor.</Text>
+        <Text style={styles.hint}>CSV, JSON o Excel (.xlsx). El archivo se procesará con el ingestor.</Text>
+
         {uploading ? (
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { width: `${uploadProgress}%` as any }]} />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator color={COLORS.accent} size="large" />
+            <Text style={styles.loadingText}>Procesando archivo...</Text>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressBar, { width: `${uploadProgress}%` as any }]} />
+            </View>
             <Text style={styles.progressText}>{uploadProgress}%</Text>
           </View>
         ) : (
           <>
+            {selectedFile && (
+              <View style={styles.filePreview}>
+                <Text style={styles.fileName} numberOfLines={1}>📄  {selectedFile.name}</Text>
+                {selectedFile.size != null && (
+                  <Text style={styles.fileSize}>{formatFileSize(selectedFile.size)}</Text>
+                )}
+              </View>
+            )}
+
             <TouchableOpacity style={styles.uploadBtn} onPress={handlePickFile}>
-              <Text style={styles.uploadBtnText}>📁  Seleccionar archivo</Text>
+              <Text style={styles.uploadBtnText}>
+                {selectedFile ? '🔄  Cambiar archivo' : '📁  Seleccionar archivo'}
+              </Text>
             </TouchableOpacity>
+
+            {selectedFile && (
+              <TouchableOpacity
+                style={error ? styles.retryBtn : styles.ingestBtn}
+                onPress={handleIngest}
+              >
+                <Text style={error ? styles.retryBtnText : styles.ingestBtnText}>
+                  {error ? '↺  Reintentar' : '⚡  Ingestar'}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity style={styles.mockBtn} onPress={handleMockUpload}>
               <Text style={styles.mockBtnText}>🧪  Cargar datos de prueba</Text>
             </TouchableOpacity>
@@ -355,6 +412,29 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   metaText: { color: COLORS.textSecondary, fontSize: 13 },
   hint: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 14 },
+  filePreview: {
+    backgroundColor: COLORS.background,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  fileName: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 8,
+  },
+  fileSize: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
   uploadBtn: {
     backgroundColor: COLORS.accent,
     paddingVertical: 13,
@@ -362,6 +442,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   uploadBtnText: { color: '#000', fontWeight: '700', fontSize: 15 },
+  ingestBtn: {
+    marginTop: 10,
+    backgroundColor: COLORS.accent + 'DD',
+    paddingVertical: 13,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  ingestBtnText: { color: '#000', fontWeight: '700', fontSize: 15 },
+  retryBtn: {
+    marginTop: 10,
+    backgroundColor: '#FF6B35',
+    paddingVertical: 13,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  retryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   mockBtn: {
     marginTop: 10,
     borderWidth: 1,
@@ -371,15 +467,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mockBtnText: { color: COLORS.accent, fontWeight: '700', fontSize: 15 },
-  progressContainer: {
-    height: 36,
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 10,
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  progressTrack: {
+    width: '100%',
+    height: 8,
     backgroundColor: COLORS.background,
-    borderRadius: 8,
+    borderRadius: 4,
     overflow: 'hidden',
-    justifyContent: 'center',
   },
   progressBar: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: COLORS.accent },
-  progressText: { color: '#000', fontWeight: '700', textAlign: 'center' },
+  progressText: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '700' },
   successBanner: {
     backgroundColor: COLORS.success + '22',
     borderColor: COLORS.success,
