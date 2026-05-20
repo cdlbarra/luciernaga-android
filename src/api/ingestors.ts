@@ -4,7 +4,10 @@ import { Ingestor, TransformedDataResponse, IngestResponse } from '../types';
 
 const api = axios.create({
   baseURL: BASE_URL,
-  headers: { 'x-vercel-protection-bypass': 'jkURsFWJq3k8DpKoDDOU384UbGsmopdU' },
+  headers: {
+    'x-vercel-protection-bypass': 'jkURsFWJq3k8DpKoDDOU384UbGsmopdU',
+    'Accept': 'application/json; charset=utf-8',
+  },
 });
 
 export async function getIngestors(): Promise<Ingestor[]> {
