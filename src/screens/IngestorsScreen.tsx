@@ -1,3 +1,4 @@
+import * as DocumentPicker from 'expo-document-picker';
 import React, { useCallback, useState } from 'react';
 import {
   FlatList,
@@ -90,6 +91,25 @@ export default function IngestorsScreen() {
     setCreateError(null);
   };
 
+  const handleSuggestName = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['text/csv', 'application/json', 'text/plain',
+               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '*/*'],
+        copyToCacheDirectory: false,
+      });
+      if (result.canceled) return;
+      const file = result.assets?.[0];
+      if (!file?.name) return;
+      const suggested = file.name.replace(/\.[^.]+$/, '');
+      if (!name.trim()) setName(suggested);
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      if (ext === 'json') setSourceType('json');
+      else if (ext === 'xlsx') setSourceType('excel');
+      else if (ext === 'csv') setSourceType('csv');
+    } catch {}
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -153,6 +173,9 @@ export default function IngestorsScreen() {
               value={name}
               onChangeText={setName}
             />
+            <TouchableOpacity onPress={handleSuggestName} style={styles.suggestBtn}>
+              <Text style={styles.suggestText}>📁  Sugerir desde archivo</Text>
+            </TouchableOpacity>
 
             <Text style={styles.label}>Descripción</Text>
             <TextInput
@@ -304,4 +327,6 @@ const styles = StyleSheet.create({
   },
   createBtnDisabled: { opacity: 0.4 },
   createBtnText: { color: '#000', fontWeight: '800', fontSize: 15 },
+  suggestBtn: { marginTop: 6, alignSelf: 'flex-start' },
+  suggestText: { color: COLORS.accent, fontSize: 12, fontWeight: '600' },
 });

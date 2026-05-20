@@ -29,6 +29,14 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+function formatCellValue(col: string, value: string): string {
+  if (/fecha|date/i.test(col)) {
+    const m = value.match(/^(\d{4}-\d{2}-\d{2})[T ]\d{2}:\d{2}/);
+    if (m) return m[1];
+  }
+  return value;
+}
+
 function detectDateColumn(columns: string[]): string | null {
   return columns.find((c) => /date|fecha|time|año|year/i.test(c)) ?? null;
 }
@@ -344,7 +352,7 @@ export default function IngestorDetailScreen({ route }: Props) {
                   <View key={i} style={[styles.tableRow, i % 2 === 1 && styles.tableRowAlt]}>
                     {columns.slice(0, 6).map((col) => (
                       <Text key={col} style={styles.tableCell} numberOfLines={1}>
-                        {String(row[col] ?? '')}
+                        {formatCellValue(col, String(row[col] ?? ''))}
                       </Text>
                     ))}
                   </View>
