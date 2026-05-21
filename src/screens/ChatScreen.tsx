@@ -101,7 +101,7 @@ export default function ChatScreen() {
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
     if (!isUser) {
-      console.log('MSG CONTENT LENGTH:', item.content.length, item.content.substring(0, 100));
+      console.log('TEXTO A RENDERIZAR:', item.content.length, '|', item.content);
     }
     return (
       <View style={{
