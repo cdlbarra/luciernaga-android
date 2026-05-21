@@ -115,7 +115,7 @@ export default function ChatScreen() {
               <Markdown style={markdownStyles}>{item.content}</Markdown>
             </ScrollView>
           ) : (
-            <Text style={{ color: '#FFFFFF', fontSize: 15, flexWrap: 'wrap' }} numberOfLines={0}>
+            <Text style={{ color: '#FFFFFF', fontSize: 15, flexWrap: 'wrap', width: '100%' }} numberOfLines={0}>
               {item.content}
             </Text>
           )}
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   listContent: { paddingHorizontal: 12, paddingVertical: 8, flexGrow: 1 },
   msgRow: { flexDirection: 'row', marginVertical: 4, alignItems: 'flex-end' },
   msgRowUser: { justifyContent: 'flex-end' },
-  msgRowBot: { justifyContent: 'flex-start' },
+  msgRowBot: { justifyContent: 'flex-start', alignItems: 'flex-start' },
   avatar: {
     width: 28,
     height: 28,
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   bubbleBot: {
     flexShrink: 1,
-    alignSelf: 'stretch',
+    maxWidth: '90%',
     backgroundColor: COLORS.card,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
