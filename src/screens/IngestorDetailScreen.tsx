@@ -11,11 +11,11 @@ import {
 } from 'react-native';
 import type { RouteProp } from '@react-navigation/native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
-import { getTransformedData, ingestFile, ingestMockData, updateIngestorStatus } from '../api/ingestors';
+import { getTransformedData, getPipelineRuns, ingestFile, ingestMockData, updateIngestorStatus } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
 import StatusBadge from '../components/StatusBadge';
 import { COLORS } from '../constants';
-import { RootStackParamList, TransformedDataResponse, TransformedDataRow } from '../types';
+import { PipelineRun, RootStackParamList, TransformedDataResponse, TransformedDataRow } from '../types';
 
 type Props = { route: RouteProp<RootStackParamList, 'IngestorDetail'> };
 
@@ -73,6 +73,8 @@ export default function IngestorDetailScreen({ route }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
+  const [runs, setRuns] = useState<PipelineRun[]>([]);
+  const [loadingRuns, setLoadingRuns] = useState(false);
 
   const loadData = useCallback(async (p: number) => {
     setLoadingData(true);
@@ -87,9 +89,22 @@ export default function IngestorDetailScreen({ route }: Props) {
     }
   }, [ingestor.id]);
 
+  const loadRuns = useCallback(async () => {
+    setLoadingRuns(true);
+    try {
+      const data = await getPipelineRuns(ingestor.id);
+      setRuns(data.slice(0, 5));
+    } catch {
+      // historial no crítico, falla silenciosa
+    } finally {
+      setLoadingRuns(false);
+    }
+  }, [ingestor.id]);
+
   useEffect(() => {
     loadData(1);
-  }, [loadData]);
+    loadRuns();
+  }, [loadData, loadRuns]);
 
   const handleMockUpload = async () => {
     setUploading(true);
@@ -108,6 +123,7 @@ export default function IngestorDetailScreen({ route }: Props) {
       updateIngestorStatus(ingestor.id, 'active').catch(() => null);
       setPage(1);
       await loadData(1);
+      loadRuns();
     } catch (e: any) {
       const status = e?.response?.status;
       const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error;
@@ -193,6 +209,7 @@ export default function IngestorDetailScreen({ route }: Props) {
       updateIngestorStatus(ingestor.id, 'active').catch(() => null);
       setPage(1);
       await loadData(1);
+      loadRuns();
     } catch (e: any) {
       const status = e?.response?.status;
       const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error;
@@ -385,6 +402,35 @@ export default function IngestorDetailScreen({ route }: Props) {
           <Text style={styles.noData}>Sin datos. Carga un archivo para comenzar.</Text>
         )}
       </View>
+
+      {/* Pipeline runs history */}
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Historial de Ingestas</Text>
+        {loadingRuns ? (
+          <ActivityIndicator color={COLORS.accent} style={{ marginVertical: 12 }} />
+        ) : runs.length === 0 ? (
+          <Text style={styles.noData}>Sin ingestas registradas.</Text>
+        ) : (
+          runs.map((run) => {
+            const isSuccess = run.status === 'success';
+            const date = new Date(run.created_at);
+            const dateStr = date.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            const timeStr = date.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            return (
+              <View key={run.id} style={styles.runItem}>
+                <Text style={styles.runIcon}>{isSuccess ? '✅' : '❌'}</Text>
+                <View style={styles.runInfo}>
+                  <Text style={styles.runDate}>{dateStr}  {timeStr}</Text>
+                  {isSuccess
+                    ? <Text style={styles.runRows}>{run.rows_processed ?? 0} filas procesadas</Text>
+                    : <Text style={styles.runError}>{run.error_message ?? 'Error desconocido'}</Text>
+                  }
+                </View>
+              </View>
+            );
+          })
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -555,4 +601,17 @@ const styles = StyleSheet.create({
   pageBtnText: { color: COLORS.accent, fontWeight: '700', fontSize: 13 },
   pageInfo: { color: COLORS.textSecondary, fontSize: 13 },
   noData: { color: COLORS.textSecondary, textAlign: 'center', paddingVertical: 20, fontSize: 14 },
+  runItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+    gap: 10,
+  },
+  runIcon: { fontSize: 18, marginTop: 1 },
+  runInfo: { flex: 1 },
+  runDate: { color: COLORS.textSecondary, fontSize: 12, marginBottom: 2 },
+  runRows: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
+  runError: { color: COLORS.error, fontSize: 13 },
 });

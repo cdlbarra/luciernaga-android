@@ -32,6 +32,14 @@ export interface IngestResponse {
   errors?: string[];
 }
 
+export interface PipelineRun {
+  id: string;
+  status: 'success' | 'error' | 'processing';
+  created_at: string;
+  rows_processed?: number;
+  error_message?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';

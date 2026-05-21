@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { BASE_URL } from '../constants';
-import { Ingestor, TransformedDataResponse, IngestResponse } from '../types';
+import { Ingestor, TransformedDataResponse, IngestResponse, PipelineRun } from '../types';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -99,4 +99,11 @@ export async function getTransformedData(
       columnTypes: data.columnTypes ?? {},
     },
   };
+}
+
+export async function getPipelineRuns(ingestor_id: string): Promise<PipelineRun[]> {
+  const { data } = await api.get<PipelineRun[]>(
+    `/api/pipeline-runs?ingestor_id=${ingestor_id}`
+  );
+  return data;
 }
