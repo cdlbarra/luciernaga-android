@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Markdown from 'react-native-markdown-display';
 import { sendChatMessage, ChatDataContext } from '../api/chat';
 import { getIngestors, getTransformedData } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
@@ -104,9 +105,11 @@ export default function ChatScreen() {
           </View>
         )}
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}>
-          <Text style={[styles.bubbleText, isUser ? styles.bubbleTextUser : styles.bubbleTextBot]}>
-            {item.content}
-          </Text>
+          {isUser ? (
+            <Text style={styles.bubbleTextUser}>{item.content}</Text>
+          ) : (
+            <Markdown style={markdownStyles}>{item.content}</Markdown>
+          )}
           <Text style={styles.timestamp}>
             {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
           </Text>
@@ -235,6 +238,14 @@ export default function ChatScreen() {
     </SafeAreaView>
   );
 }
+
+const markdownStyles = {
+  body: { color: COLORS.textPrimary, fontSize: 14, lineHeight: 20 },
+  table: { borderWidth: 1, borderColor: '#444' },
+  th: { backgroundColor: '#333', color: '#F5C518', padding: 6 },
+  td: { color: COLORS.textPrimary, padding: 6, borderColor: '#444' },
+  tr: { borderBottomWidth: 1, borderColor: '#444' },
+};
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
