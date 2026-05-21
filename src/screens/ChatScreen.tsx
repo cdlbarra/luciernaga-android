@@ -100,26 +100,42 @@ export default function ChatScreen() {
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
+    if (!isUser) {
+      console.log('MSG CONTENT LENGTH:', item.content.length, item.content.substring(0, 100));
+    }
     return (
-      <View style={[styles.msgRow, isUser ? styles.msgRowUser : styles.msgRowBot]}>
+      <View style={{
+        flexDirection: 'row',
+        marginVertical: 4,
+        paddingHorizontal: 8,
+        justifyContent: isUser ? 'flex-end' : 'flex-start'
+      }}>
         {!isUser && (
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>✨</Text>
+          <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#2a2a2a',
+            justifyContent: 'center', alignItems: 'center', marginRight: 6, marginTop: 4 }}>
+            <Text>✨</Text>
           </View>
         )}
-        <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}>
-          {isUser ? (
-            <Text style={styles.bubbleTextUser}>{item.content}</Text>
-          ) : hasTable(item.content) ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{ flexGrow: 1 }}>
+        <View style={{
+          maxWidth: '80%',
+          backgroundColor: isUser ? '#F5C518' : '#2a2a2a',
+          borderRadius: 16,
+          padding: 12,
+        }}>
+          {!isUser && hasTable(item.content) ? (
+            <ScrollView horizontal>
               <Markdown style={markdownStyles}>{item.content}</Markdown>
             </ScrollView>
           ) : (
-            <Text style={{ color: '#FFFFFF', fontSize: 15, flexWrap: 'wrap', width: '100%' }} numberOfLines={0}>
+            <Text style={{
+              color: isUser ? '#000000' : '#FFFFFF',
+              fontSize: 15,
+            }}>
               {item.content}
             </Text>
           )}
-          <Text style={styles.timestamp}>
+          <Text style={{ fontSize: 10, color: isUser ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)',
+            marginTop: 4, textAlign: 'right' }}>
             {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
           </Text>
         </View>
