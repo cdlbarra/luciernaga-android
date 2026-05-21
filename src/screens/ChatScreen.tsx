@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -131,30 +132,36 @@ export default function ChatScreen() {
 
       {/* Ingestor selector */}
       {ingestors.length > 0 && (
-        <View style={styles.selectorContainer}>
+        <View style={styles.selectorRow}>
           <Text style={styles.selectorLabel}>Contexto:</Text>
-          <TouchableOpacity
-            style={[styles.selectorChip, !selectedIngestor && styles.selectorChipActive]}
-            onPress={() => setSelectedIngestor(undefined)}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.selectorScrollContent}
           >
-            <Text style={[styles.selectorChipText, !selectedIngestor && styles.selectorChipTextActive]}>
-              General
-            </Text>
-          </TouchableOpacity>
-          {ingestors.map((ing) => (
             <TouchableOpacity
-              key={ing.id}
-              style={[styles.selectorChip, selectedIngestor === ing.id && styles.selectorChipActive]}
-              onPress={() => setSelectedIngestor(selectedIngestor === ing.id ? undefined : ing.id)}
+              style={[styles.selectorChip, !selectedIngestor && styles.selectorChipActive]}
+              onPress={() => setSelectedIngestor(undefined)}
             >
-              <Text
-                style={[styles.selectorChipText, selectedIngestor === ing.id && styles.selectorChipTextActive]}
-                numberOfLines={1}
-              >
-                {ing.name}
+              <Text style={[styles.selectorChipText, !selectedIngestor && styles.selectorChipTextActive]}>
+                General
               </Text>
             </TouchableOpacity>
-          ))}
+            {ingestors.map((ing) => (
+              <TouchableOpacity
+                key={ing.id}
+                style={[styles.selectorChip, selectedIngestor === ing.id && styles.selectorChipActive]}
+                onPress={() => setSelectedIngestor(selectedIngestor === ing.id ? undefined : ing.id)}
+              >
+                <Text
+                  style={[styles.selectorChipText, selectedIngestor === ing.id && styles.selectorChipTextActive]}
+                  numberOfLines={1}
+                >
+                  {ing.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       )}
 
@@ -238,15 +245,20 @@ const styles = StyleSheet.create({
   },
   title: { color: COLORS.textPrimary, fontSize: 26, fontWeight: '800' },
   subtitle: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
-  selectorContainer: {
+  selectorRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
     alignItems: 'center',
+    paddingLeft: 16,
+    paddingVertical: 8,
+    maxHeight: 80,
   },
-  selectorLabel: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600' },
+  selectorScrollContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingRight: 16,
+  },
+  selectorLabel: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600', marginRight: 8 },
   selectorChip: {
     paddingHorizontal: 10,
     paddingVertical: 5,
