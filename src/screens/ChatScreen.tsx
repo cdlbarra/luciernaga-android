@@ -21,6 +21,9 @@ import { ChatMessage, Ingestor } from '../types';
 let msgCounter = 0;
 const uid = () => String(++msgCounter);
 
+const hasTable = (text: string) =>
+  text.includes('|---|') || text.includes('| --- |') || text.includes('| --');
+
 export default function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -107,10 +110,12 @@ export default function ChatScreen() {
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleBot]}>
           {isUser ? (
             <Text style={styles.bubbleTextUser}>{item.content}</Text>
-          ) : (
+          ) : hasTable(item.content) ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
               <Markdown style={markdownStyles}>{item.content}</Markdown>
             </ScrollView>
+          ) : (
+            <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{item.content}</Text>
           )}
           <Text style={styles.timestamp}>
             {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
