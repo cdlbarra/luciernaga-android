@@ -108,7 +108,9 @@ export default function ChatScreen() {
           {isUser ? (
             <Text style={styles.bubbleTextUser}>{item.content}</Text>
           ) : (
-            <Markdown style={markdownStyles}>{item.content}</Markdown>
+            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+              <Markdown style={markdownStyles}>{item.content}</Markdown>
+            </ScrollView>
           )}
           <Text style={styles.timestamp}>
             {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
@@ -240,10 +242,10 @@ export default function ChatScreen() {
 }
 
 const markdownStyles = {
-  body: { color: COLORS.textPrimary, fontSize: 14, lineHeight: 20 },
+  body: { color: '#FFFFFF', fontSize: 15, lineHeight: 22, minWidth: 500 },
   table: { borderWidth: 1, borderColor: '#444' },
-  th: { backgroundColor: '#333', color: '#F5C518', padding: 6 },
-  td: { color: COLORS.textPrimary, padding: 6, borderColor: '#444' },
+  th: { backgroundColor: '#333', color: '#F5C518', padding: 8, fontSize: 13 },
+  td: { color: '#FFFFFF', padding: 8, borderColor: '#444', fontSize: 13 },
   tr: { borderBottomWidth: 1, borderColor: '#444' },
 };
 
