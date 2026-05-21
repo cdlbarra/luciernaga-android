@@ -33,11 +33,10 @@ export async function sendChatMessage(
     }
   }
 
-  const response = await api.post<ChatResponse>('/api/chat', {
+  const { data } = await api.post<ChatResponse>('/api/chat', {
     messages: [{ role: 'user', content: message }],
     model: 'command-light',
     ...(context ? { context } : {}),
   });
-  console.log('RESPUESTA BACKEND COMPLETA:', JSON.stringify(response.data));
-  return response.data;
+  return data;
 }

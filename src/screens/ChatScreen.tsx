@@ -100,15 +100,12 @@ export default function ChatScreen() {
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     const isUser = item.role === 'user';
-    if (!isUser) {
-      console.log('TEXTO A RENDERIZAR:', item.content.length, '|', item.content);
-    }
     return (
       <View style={{
         flexDirection: 'row',
         marginVertical: 4,
         paddingHorizontal: 8,
-        justifyContent: isUser ? 'flex-end' : 'flex-start'
+        justifyContent: isUser ? 'flex-end' : 'flex-start',
       }}>
         {!isUser && (
           <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#2a2a2a',
@@ -116,29 +113,44 @@ export default function ChatScreen() {
             <Text>✨</Text>
           </View>
         )}
-        <View style={{
-          maxWidth: '80%',
-          backgroundColor: isUser ? '#F5C518' : '#2a2a2a',
-          borderRadius: 16,
-          padding: 12,
-        }}>
-          {!isUser && hasTable(item.content) ? (
-            <ScrollView horizontal>
-              <Markdown style={markdownStyles}>{item.content}</Markdown>
-            </ScrollView>
-          ) : (
+        {isUser ? (
+          <View style={{
+            maxWidth: '80%',
+            backgroundColor: '#F5C518',
+            borderRadius: 16,
+            padding: 12,
+          }}>
+            <Text style={{ color: '#000000', fontSize: 15 }}>
+              {item.content}
+            </Text>
+            <Text style={{ fontSize: 10, color: 'rgba(0,0,0,0.5)', marginTop: 4, textAlign: 'right' }}>
+              {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </View>
+        ) : (
+          <View style={{
+            width: '80%',
+            backgroundColor: '#2a2a2a',
+            borderRadius: 16,
+            padding: 12,
+          }}>
             <Text style={{
-              color: isUser ? '#000000' : '#FFFFFF',
+              color: '#FFFFFF',
               fontSize: 15,
+              lineHeight: 22,
             }}>
               {item.content}
             </Text>
-          )}
-          <Text style={{ fontSize: 10, color: isUser ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)',
-            marginTop: 4, textAlign: 'right' }}>
-            {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-          </Text>
-        </View>
+            <Text style={{
+              fontSize: 10,
+              color: 'rgba(255,255,255,0.5)',
+              marginTop: 4,
+              textAlign: 'right',
+            }}>
+              {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          </View>
+        )}
       </View>
     );
   };
