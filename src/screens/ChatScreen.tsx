@@ -111,11 +111,13 @@ export default function ChatScreen() {
           {isUser ? (
             <Text style={styles.bubbleTextUser}>{item.content}</Text>
           ) : hasTable(item.content) ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={true} style={{ flexGrow: 1 }}>
               <Markdown style={markdownStyles}>{item.content}</Markdown>
             </ScrollView>
           ) : (
-            <Text style={{ color: '#FFFFFF', fontSize: 15 }}>{item.content}</Text>
+            <Text style={{ color: '#FFFFFF', fontSize: 15, flexWrap: 'wrap' }} numberOfLines={0}>
+              {item.content}
+            </Text>
           )}
           <Text style={styles.timestamp}>
             {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
@@ -314,16 +316,18 @@ const styles = StyleSheet.create({
   },
   avatarText: { fontSize: 14 },
   bubble: {
-    maxWidth: '75%',
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
   bubbleUser: {
+    maxWidth: '75%',
     backgroundColor: COLORS.accent,
     borderBottomRightRadius: 4,
   },
   bubbleBot: {
+    flexShrink: 1,
+    alignSelf: 'stretch',
     backgroundColor: COLORS.card,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
