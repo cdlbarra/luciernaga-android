@@ -1,13 +1,15 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../constants';
+import { useAuth } from '../context/AuthContext';
 import IngestorsScreen from '../screens/IngestorsScreen';
 import IngestorDetailScreen from '../screens/IngestorDetailScreen';
 import ChatScreen from '../screens/ChatScreen';
+import LoginScreen from '../screens/LoginScreen';
 import { BottomTabParamList, RootStackParamList } from '../types';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
@@ -39,7 +41,7 @@ function IngestorsStack() {
   );
 }
 
-export default function AppNavigator() {
+function TabNavigator() {
   const insets = useSafeAreaInsets();
   return (
     <NavigationContainer>
@@ -81,4 +83,20 @@ export default function AppNavigator() {
       </Tab.Navigator>
     </NavigationContainer>
   );
+}
+
+export default function AppNavigator() {
+  const { session, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: COLORS.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator color={COLORS.accent} size="large" />
+      </View>
+    );
+  }
+
+  if (!session) return <LoginScreen />;
+
+  return <TabNavigator />;
 }

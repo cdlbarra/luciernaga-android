@@ -19,6 +19,7 @@ import ErrorBanner from '../components/ErrorBanner';
 import IngestorCard from '../components/IngestorCard';
 import LoadingOverlay from '../components/LoadingOverlay';
 import { COLORS } from '../constants';
+import { useAuth } from '../context/AuthContext';
 import { Ingestor, RootStackParamList } from '../types';
 
 type Nav = StackNavigationProp<RootStackParamList>;
@@ -26,6 +27,7 @@ type Nav = StackNavigationProp<RootStackParamList>;
 const SOURCE_TYPES = ['csv', 'json', 'excel', 'api', 'database'];
 
 export default function IngestorsScreen() {
+  const { signOut } = useAuth();
   const navigation = useNavigation<Nav>();
   const insets = useSafeAreaInsets();
   const [ingestors, setIngestors] = useState<Ingestor[]>([]);
@@ -114,6 +116,9 @@ export default function IngestorsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Ingestores</Text>
+        <TouchableOpacity onPress={signOut} style={{ padding: 8 }}>
+          <Text style={{ color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' }}>Salir</Text>
+        </TouchableOpacity>
       </View>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}

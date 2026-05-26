@@ -16,6 +16,7 @@ import { sendChatMessage, ChatDataContext } from '../api/chat';
 import { getIngestors, getTransformedData } from '../api/ingestors';
 import ErrorBanner from '../components/ErrorBanner';
 import { COLORS } from '../constants';
+import { useAuth } from '../context/AuthContext';
 import { ChatMessage, Ingestor } from '../types';
 
 let msgCounter = 0;
@@ -25,6 +26,8 @@ const hasTable = (text: string) =>
   text.includes('|---|') || text.includes('| --- |') || text.includes('| --');
 
 export default function ChatScreen() {
+  const { session } = useAuth();
+  const userEmail = session?.user?.email ?? '';
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -67,8 +70,8 @@ export default function ChatScreen() {
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    const text = input.trim();
+  const handleSend = async (overrideText?: string) => {
+    const text = overrideText ?? input.trim();
     if (!text || sending) return;
 
     const userMsg: ChatMessage = {
@@ -78,7 +81,7 @@ export default function ChatScreen() {
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMsg]);
-    setInput('');
+    if (!overrideText) setInput('');
     setSending(true);
     setError(null);
 
@@ -106,56 +109,57 @@ export default function ChatScreen() {
         marginVertical: 4,
         paddingHorizontal: 8,
         justifyContent: isUser ? 'flex-end' : 'flex-start',
+        alignItems: 'flex-start',
       }}>
         {!isUser && (
           <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#2a2a2a',
-            justifyContent: 'center', alignItems: 'center', marginRight: 6, marginTop: 4 }}>
+            justifyContent: 'center', alignItems: 'center', marginRight: 6, marginTop: 4, flexShrink: 0 }}>
             <Text>✨</Text>
           </View>
         )}
-        {isUser ? (
-          <View style={{
-            maxWidth: '80%',
-            backgroundColor: '#F5C518',
-            borderRadius: 16,
-            padding: 12,
+        <View style={{
+          maxWidth: '80%',
+          flexShrink: 1,
+          backgroundColor: isUser ? '#F5C518' : '#2a2a2a',
+          borderRadius: 16,
+          padding: 12,
+        }}>
+          <Text style={{
+            color: isUser ? '#000000' : '#FFFFFF',
+            fontSize: 15,
+            lineHeight: 22,
+            flexShrink: 1,
           }}>
-            <Text style={{ color: '#000000', fontSize: 15 }}>
-              {item.content}
-            </Text>
-            <Text style={{ fontSize: 10, color: 'rgba(0,0,0,0.5)', marginTop: 4, textAlign: 'right' }}>
-              {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-            </Text>
-          </View>
-        ) : (
-          <View style={{
-            width: '80%',
-            backgroundColor: '#2a2a2a',
-            borderRadius: 16,
-            padding: 12,
+            {item.content}
+          </Text>
+          <Text style={{
+            fontSize: 10,
+            color: isUser ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)',
+            marginTop: 4,
+            textAlign: 'right',
           }}>
-            <Text style={{
-              color: '#FFFFFF',
-              fontSize: 15,
-              lineHeight: 22,
-            }}>
-              {item.content}
-            </Text>
-            <Text style={{
-              fontSize: 10,
-              color: 'rgba(255,255,255,0.5)',
-              marginTop: 4,
-              textAlign: 'right',
-            }}>
-              {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
-            </Text>
-          </View>
-        )}
+            {item.timestamp.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+        </View>
       </View>
     );
   };
 
   const activeIngestor = ingestors.find((i) => i.id === selectedIngestor);
+
+  const suggestions = selectedIngestor
+    ? [
+        '¿Cuántos registros tiene este archivo?',
+        '¿Qué columnas tiene?',
+        'Dame un resumen de los datos',
+        '¿Hay valores vacíos o errores?',
+      ]
+    : [
+        '¿Qué puedo hacer con esta app?',
+        '¿Cómo cargo un archivo?',
+        '¿Qué tipos de archivo acepta?',
+        '¿Cómo analizo mis datos?',
+      ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
@@ -166,7 +170,14 @@ export default function ChatScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Chat IA</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Text style={styles.title}>Chat IA</Text>
+          {userEmail ? (
+            <Text style={{ color: COLORS.accent, fontSize: 12, fontWeight: '600', marginTop: 6 }} numberOfLines={1}>
+              {userEmail}
+            </Text>
+          ) : null}
+        </View>
         <Text style={styles.subtitle}>Luciérnaga · Cohere AI</Text>
       </View>
 
@@ -220,23 +231,36 @@ export default function ChatScreen() {
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
-      {/* Messages */}
-      <FlatList
-        ref={listRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyChat}>
-            <Text style={styles.emptyChatIcon}>✨</Text>
-            <Text style={styles.emptyChatTitle}>Hola, soy Luciérnaga</Text>
-            <Text style={styles.emptyChatHint}>
-              Pregúntame sobre tus datos o cualquier análisis que necesites.
-            </Text>
+      {/* Messages / Welcome */}
+      {messages.length === 0 ? (
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.welcomeIcon}>✨</Text>
+          <Text style={styles.welcomeTitle}>¡Hola! Soy tu asistente de datos</Text>
+          <Text style={styles.welcomeSubtitle}>
+            Selecciona un ingestor y hazme preguntas sobre tus datos
+          </Text>
+          <View style={styles.suggestionsRow}>
+            {suggestions.map((s) => (
+              <TouchableOpacity
+                key={s}
+                style={styles.suggestionChip}
+                onPress={() => handleSend(s)}
+                disabled={sending}
+              >
+                <Text style={styles.suggestionChipText}>{s}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-        }
-      />
+        </View>
+      ) : (
+        <FlatList
+          ref={listRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessage}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
 
       {/* Typing indicator */}
       {sending && (
@@ -265,7 +289,7 @@ export default function ChatScreen() {
         />
         <TouchableOpacity
           style={[styles.sendBtn, (!input.trim() || sending) && styles.sendBtnDisabled]}
-          onPress={handleSend}
+          onPress={() => handleSend()}
           disabled={!input.trim() || sending}
         >
           <Text style={styles.sendIcon}>➤</Text>
@@ -375,16 +399,43 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   typingText: { color: COLORS.textSecondary, fontSize: 13 },
-  emptyChat: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 80 },
-  emptyChatIcon: { fontSize: 56, marginBottom: 16 },
-  emptyChatTitle: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '800', marginBottom: 8 },
-  emptyChatHint: {
-    color: COLORS.textSecondary,
+  welcomeContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  welcomeIcon: { fontSize: 48, marginBottom: 16 },
+  welcomeTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    color: '#888888',
     fontSize: 14,
     textAlign: 'center',
-    paddingHorizontal: 40,
     lineHeight: 20,
+    marginBottom: 24,
   },
+  suggestionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  suggestionChip: {
+    backgroundColor: '#2a2a2a',
+    borderWidth: 1,
+    borderColor: '#F5C518',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  suggestionChipText: { color: '#F5C518', fontSize: 13 },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',

@@ -1,14 +1,5 @@
-import axios from 'axios';
-import { BASE_URL } from '../constants';
+import { apiClient as api } from '../lib/apiClient';
 import { Ingestor, TransformedDataResponse, IngestResponse, PipelineRun } from '../types';
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'x-vercel-protection-bypass': 'jkURsFWJq3k8DpKoDDOU384UbGsmopdU',
-    'Accept': 'application/json; charset=utf-8',
-  },
-});
 
 export async function getIngestors(): Promise<Ingestor[]> {
   const { data } = await api.get<Ingestor[]>('/api/ingestors');

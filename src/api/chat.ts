@@ -1,11 +1,5 @@
-import axios from 'axios';
-import { BASE_URL } from '../constants';
+import { apiClient as api } from '../lib/apiClient';
 import { ChatResponse } from '../types';
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: { 'x-vercel-protection-bypass': 'jkURsFWJq3k8DpKoDDOU384UbGsmopdU' },
-});
 
 export type ChatDataContext = {
   ingestor_name: string;
