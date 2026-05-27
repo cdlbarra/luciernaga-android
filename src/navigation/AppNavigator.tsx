@@ -4,8 +4,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useShareIntent } from 'expo-share-intent';
 import { COLORS } from '../constants';
 import { useAuth } from '../context/AuthContext';
+import ShareIntentModal from '../components/ShareIntentModal';
 import IngestorsScreen from '../screens/IngestorsScreen';
 import IngestorDetailScreen from '../screens/IngestorDetailScreen';
 import ChatScreen from '../screens/ChatScreen';
@@ -43,7 +45,11 @@ function IngestorsStack() {
 
 function TabNavigator() {
   const insets = useSafeAreaInsets();
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent();
+  const sharedFile = hasShareIntent ? (shareIntent?.files?.[0] ?? null) : null;
+
   return (
+    <>
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={{
@@ -82,6 +88,18 @@ function TabNavigator() {
         />
       </Tab.Navigator>
     </NavigationContainer>
+    {sharedFile && (
+      <ShareIntentModal
+        file={{
+          path: sharedFile.path,
+          fileName: sharedFile.fileName,
+          mimeType: sharedFile.mimeType,
+          size: sharedFile.size ?? undefined,
+        }}
+        onDismiss={resetShareIntent}
+      />
+    )}
+    </>
   );
 }
 

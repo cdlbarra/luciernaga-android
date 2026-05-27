@@ -4,6 +4,7 @@
     "slug": "luciernaga",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "luciernaga",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
@@ -21,7 +22,8 @@
         "backgroundColor": "#1a1a1a"
       },
       "package": "com.cdlbarra.luciernaga",
-      "versionCode": 2
+      "versionCode": 2,
+      "jsEngine": "hermes"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,7 +36,22 @@
           "iCloudContainerEnvironment": "Production"
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-share-intent",
+        {
+          "androidIntentFilters": [
+            "text/*",
+            "application/json",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/octet-stream"
+          ],
+          "androidMainActivityAttributes": {
+            "android:launchMode": "singleTask"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
