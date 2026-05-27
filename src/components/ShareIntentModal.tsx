@@ -12,6 +12,7 @@ import {
 import { getIngestors, ingestFile } from '../api/ingestors';
 import { COLORS } from '../constants';
 import { Ingestor } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -37,13 +38,15 @@ export default function ShareIntentModal({ file, onDismiss }: Props) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const { loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
     getIngestors()
       .then(setIngestors)
-      .catch(() => {})
+      .catch((e) => Alert.alert('Error al cargar ingestores', e?.response?.data?.message ?? e?.message ?? 'Error desconocido'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [authLoading]);
 
   const handleIngest = async () => {
     if (!selected) return;
